@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import os
 
+from dotenv import load_dotenv
+
 from openai import OpenAI
 
 st.set_page_config(layout="wide")
@@ -89,6 +91,10 @@ st.markdown("""
 # SPACE AFTER HEADER (before uploader)
 st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
 
+load_dotenv()
+
+print(os.getenv("OPENAI_API_KEY"))
+
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 st.info("🌿 BasilIQ Beta: We’re continuously improving the platform. Usage may be limited during testing. Feedback is welcome at admin@basilai.in")
@@ -127,6 +133,8 @@ if file:
     
     df["Profit"] = (df["unit_price"] - df["cost"]) * df["qty"]
     total_profit = df["Profit"].sum()
+
+    margin_pct = (total_profit / total_sales) * 100
 
     avg_order = total_sales / total_orders
     active_days = df["date"].nunique()
@@ -212,9 +220,9 @@ if file:
 
         cols = st.columns(3)
 
-        cols[0].markdown(card("Total Sales",f"₹{total_sales:,.0f}"),True)
-        cols[1].markdown(card("Total Revenue",f"₹{total_revenue:,.0f}"),True)
-        cols[2].markdown(card("Total Profit",f"₹{total_profit:,.0f}"),True)
+        cols[0].markdown(card("Total Revenue",f"₹{total_revenue:,.0f}"),True)
+        cols[1].markdown(card("Total Profit",f"₹{total_profit:,.0f}"),True)
+        cols[2].markdown(card("Margin % ",f"₹{margin_pct:,.0f}"),True)
 
         cols1 = st.columns(3)
 
@@ -332,8 +340,9 @@ if file:
         if not low_action:
             low_action = "Optimize pricing strategy"
     
-    st.info("🌿 AI Decision Panel")
-
+    st.info("🌿 AI-Powered Business Insights")
+    st.caption("AI-generated recommendations based on uploaded sales data.")
+    
     c1, c2, c3 = st.columns(3)
 
     # Column 1
@@ -360,4 +369,364 @@ if file:
     c3.write("**📈 Impact**")
     c3.write(impact)
 
+st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
+
 st.markdown("For queries or support: Admin@basilai.in")
+
+with st.expander("📘 BasilIQ User Manual & KPI Logic"):
+
+    st.markdown("""
+
+## 🌿 BasilIQ User Manual
+
+### 📌 About BasilIQ
+
+BasilIQ is an AI-powered Sales Intelligence platform designed to help businesses analyze sales data, monitor business performance, identify risks, and generate actionable recommendations using AI.
+
+The platform converts raw Excel sales data into meaningful business insights including:
+
+- Revenue analysis
+- Profitability analysis
+- Product performance
+- Sales trends
+- Business Health Score
+- AI-generated insights & actions
+
+---
+
+## 📥 Supported Input File Format
+
+Upload Excel file (.xlsx) containing sales transaction data.
+
+### Recommended Columns
+
+| Column | Description |
+|---|---|
+| Date | Transaction / Order Date |
+| Product | Product Name |
+| Quantity | Units Sold |
+| Revenue / Sales | Sales Value |
+| Cost | Product Cost (Optional) |
+| Invoice Number | Unique Order Number (Optional) |
+
+---
+
+## ⚠️ Important Rules
+
+- One row should represent one transaction
+- Date format should be consistent
+- Revenue values should be numeric
+- Avoid blank rows and merged cells
+- Cost column is required for Profit & Margin analysis
+
+---
+
+## 📊 KPI Definitions & Calculation Logic
+
+---
+
+### 💰 Revenue
+
+Represents total sales value generated.
+
+#### Formula
+
+Revenue = Sum of all Sales Values
+
+---
+
+### 📦 Total Orders
+
+Represents total number of orders.
+
+#### Logic
+
+- If Invoice Number exists:
+    Count unique invoices
+
+- Otherwise:
+    Count total rows
+
+---
+
+### 💵 Average Order Value
+
+Average revenue generated per order.
+
+#### Formula
+
+Average Order Value =
+Revenue / Total Orders
+
+---
+
+### 📈 Daily Average Sales
+
+Average sales generated per active day.
+
+#### Formula
+
+Daily Average Sales =
+Revenue / Active Days
+
+---
+
+### 💰 Total Profit
+
+Represents earnings after deducting cost.
+
+#### Formula
+
+Profit =
+Revenue - Cost
+
+Total Profit =
+Sum of all profits
+
+---
+
+### 📊 Margin %
+
+Represents profitability percentage.
+
+#### Formula
+
+Margin % =
+(Total Profit / Revenue) × 100
+
+---
+
+### 🥇 Top Product Contribution %
+
+Shows dependency on highest-selling product.
+
+#### Formula
+
+Top Product % =
+(Top Product Revenue / Total Revenue) × 100
+
+#### Interpretation
+
+- Higher percentage = higher dependency risk
+- Lower percentage = healthier distribution
+
+---
+
+### 🏆 Top 3 Contribution %
+
+Shows revenue concentration among top 3 products.
+
+#### Formula
+
+Top 3 Contribution % =
+(Top 3 Products Revenue / Total Revenue) × 100
+
+#### Interpretation
+
+| Contribution % | Meaning |
+|---|---|
+| >60% | High Dependency Risk |
+| 40–60% | Moderate Risk |
+| <40% | Healthy Diversification |
+
+---
+
+## 📈 Sales Trend Analysis
+
+BasilIQ automatically analyzes sales trends over time.
+
+#### Time Grouping Logic
+
+- Short duration → Monthly trend
+- Medium duration → Quarterly trend
+- Long duration → Yearly trend
+
+---
+
+### 📉 Sales Growth %
+
+Measures latest period performance compared to previous period.
+
+#### Formula
+
+Sales Growth % =
+((Current Period Revenue - Previous Period Revenue)
+ / Previous Period Revenue) × 100
+
+---
+
+### 📌 Growth Interpretation
+
+| Growth % | Meaning |
+|---|---|
+| Positive | Sales Up |
+| Negative | Sales Down |
+| Zero | Stable |
+
+---
+
+## 🧠 Business Health Score (0–100)
+
+Business Health Score is BasilIQ’s overall business performance indicator.
+
+The score combines:
+
+- Sales Growth
+- Product Dependency
+- Sales Stability
+
+---
+
+### 1️⃣ Growth Score (40 Points)
+
+Measures sales growth trend.
+
+#### Logic
+
+- Positive growth increases score
+- Negative growth reduces score
+
+---
+
+### 2️⃣ Dependency Score (30 Points)
+
+Measures dependency on few products.
+
+#### Logic
+
+- Lower dependency = higher score
+- Higher dependency = lower score
+
+---
+
+### 3️⃣ Consistency Score (30 Points)
+
+Measures stability of sales performance.
+
+#### Logic
+
+- Stable sales = higher score
+- Highly fluctuating sales = lower score
+
+---
+
+### 📌 Final Formula
+
+Business Health Score =
+Growth Score +
+Dependency Score +
+Consistency Score
+
+Final score is normalized between 0–100.
+
+---
+
+## 🚨 Business Health Score Interpretation
+
+| Score | Interpretation |
+|---|---|
+| 75–100 | Healthy Business |
+| 50–74 | Moderate Risk |
+| Below 50 | Business Needs Attention |
+
+---
+
+## 📦 Product Insights
+
+BasilIQ identifies:
+
+- Top Performing Products
+- Low Performing Products
+- Product Dependency Risks
+- Revenue Concentration
+
+---
+
+## 🧠 AI Insights
+
+AI-generated recommendations help identify:
+
+- Key Problems
+- Growth Opportunities
+- Business Risks
+- Suggested Actions
+
+---
+
+## ⚡ Actions Logic
+
+Actions are generated based on KPI performance and trend analysis.
+
+---
+
+### 📉 Sales Down Action
+
+Triggered when latest period sales are lower than previous period.
+
+### Formula
+
+Sales Change % =
+((Current Period Revenue - Previous Period Revenue)
+ / Previous Period Revenue) × 100
+
+#### Example Output
+
+- "Sales down by 11.5%"
+- "Review weak-performing products"
+- "Increase sales & marketing activities"
+
+---
+
+### 📈 Sales Up Action
+
+Triggered when latest period sales are higher than previous period.
+
+#### Example Output
+
+- "Sales increased by 18.2%"
+- "Focus on scaling top-performing products"
+- "Maintain growth momentum"
+
+---
+
+### ⚠️ High Dependency Risk Action
+
+Triggered when Top 3 Contribution % is very high.
+
+#### Example Output
+
+- "Business heavily depends on few products"
+- "Diversify product portfolio"
+
+---
+
+### 💰 Low Margin Action
+
+Triggered when Margin % is low.
+
+#### Example Output
+
+- "Profitability is weak"
+- "Review pricing and cost structure"
+
+---
+
+## ⚠️ Important Notes
+
+- Better data quality improves insight accuracy
+- Profit analysis requires Cost data
+- AI insights are recommendation-based
+- This is currently a beta version
+
+---
+
+## 💬 Feedback & Support
+
+For feedback, suggestions, or support:
+
+📧 admin@basilai.in
+
+🌿 https://basilai.in
+
+    """)
+
