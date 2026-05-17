@@ -91,6 +91,8 @@ st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+st.info("🌿 BasilIQ Beta: We’re continuously improving the platform. Usage may be limited during testing. Feedback is welcome at admin@basilai.in")
+
 st.write("Download the sample format and upload your data")
 
 # Download button
